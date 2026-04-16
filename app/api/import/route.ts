@@ -35,8 +35,8 @@ function parseGreensparkDate(dateStr: unknown): Date {
   throw new Error(`Cannot parse date: ${dateStr}`)
 }
 
-function parseCost(costStr: unknown): number {
-  return parseFloat(String(costStr).replace(/[$,\s]/g, ''))
+function parseWeight(val: unknown): number {
+  return parseFloat(String(val).replace(/[,\s]/g, ''))
 }
 
 function getField(record: Record<string, unknown>, ...keys: string[]): string {
@@ -117,17 +117,17 @@ export async function POST(request: NextRequest) {
           'effective_date',
           'EffectiveDate'
         )
-        const costStr = getField(record, 'Cost', 'cost')
+        const weightStr = getField(record, 'Net Weight', 'net_weight', 'NetWeight', 'Weight', 'weight')
 
-        if (!effectiveDateStr || !costStr) {
+        if (!effectiveDateStr || !weightStr) {
           skipped++
           continue
         }
 
         const effectiveDate = parseGreensparkDate(effectiveDateStr)
-        const cost = parseCost(costStr)
+        const weight = parseWeight(weightStr)
 
-        if (isNaN(cost) || cost <= 0) {
+        if (isNaN(weight) || weight <= 0) {
           skipped++
           continue
         }
@@ -144,7 +144,7 @@ export async function POST(request: NextRequest) {
               customerId: customer.id,
               effectiveDate,
               commodityType,
-              cost,
+              weight,
               status,
             },
           })

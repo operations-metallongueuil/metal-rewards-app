@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/prisma'
-import { computeRewardState } from '@/lib/rewards'
+import { computeRewardState, LBS_PER_POINT, POINTS_PER_REWARD } from '@/lib/rewards'
 import ProgressBar from '@/components/ProgressBar'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
@@ -21,12 +21,12 @@ export default async function CustomerDetailPage({
 
   if (!customer) notFound()
 
-  const { currentBalance, rewardsEarned } = computeRewardState(
-    customer.transactions.map((t) => ({ cost: t.cost, effectiveDate: t.effectiveDate }))
+  const { currentPoints, totalLbs, rewardsEarned } = computeRewardState(
+    customer.transactions.map((t) => ({ weight: t.weight, effectiveDate: t.effectiveDate }))
   )
 
   const pendingRewards = customer.rewards.filter((r) => !r.redeemedAt)
-  const totalSpent = customer.transactions.reduce((sum, t) => sum + t.cost, 0)
+  const lbsInCurrentPoint = Math.floor(totalLbs % LBS_PER_POINT)
 
   return (
     <div className="p-6 max-w-4xl">
@@ -42,22 +42,26 @@ export default async function CustomerDetailPage({
           <div>
             <h1 className="text-2xl font-bold text-gray-900">{customer.name}</h1>
             <p className="text-gray-500 text-sm mt-1">
-              {customer.transactions.length} transactions &middot; $
-              {totalSpent.toFixed(2)} total ferrous &middot; {rewardsEarned} reward
+              {customer.transactions.length} transactions &middot;{' '}
+              {totalLbs.toLocaleString()} lbs total &middot; {rewardsEarned} gift card
               {rewardsEarned !== 1 ? 's' : ''} earned
             </p>
           </div>
           {pendingRewards.length > 0 && (
             <div className="bg-amber-100 text-amber-700 px-3 py-2 rounded-lg text-sm font-semibold shrink-0">
-              {pendingRewards.length} reward card{pendingRewards.length > 1 ? 's' : ''} owed
+              {pendingRewards.length} gift card{pendingRewards.length > 1 ? 's' : ''} owed
             </div>
           )}
         </div>
+
         <div>
           <p className="text-xs text-gray-500 mb-2 font-medium uppercase tracking-wide">
-            Balance toward next reward
+            Points toward next gift card — {lbsInCurrentPoint} / {LBS_PER_POINT} lbs in current point
           </p>
-          <ProgressBar current={currentBalance} />
+          <ProgressBar currentPoints={currentPoints} />
+          <p className="text-xs text-gray-400 mt-1">
+            {POINTS_PER_REWARD - currentPoints} more point{POINTS_PER_REWARD - currentPoints !== 1 ? 's' : ''} needed &middot; each point = {LBS_PER_POINT} lbs
+          </p>
         </div>
       </div>
 
@@ -108,7 +112,7 @@ export default async function CustomerDetailPage({
             <tr>
               <th className="text-left px-4 py-3 font-medium text-gray-600">Date &amp; Time</th>
               <th className="text-left px-4 py-3 font-medium text-gray-600">Type</th>
-              <th className="text-right px-4 py-3 font-medium text-gray-600">Amount</th>
+              <th className="text-right px-4 py-3 font-medium text-gray-600">Weight (lbs)</th>
             </tr>
           </thead>
           <tbody className="divide-y">
@@ -125,7 +129,7 @@ export default async function CustomerDetailPage({
                 </td>
                 <td className="px-4 py-3 text-gray-700">{tx.commodityType}</td>
                 <td className="px-4 py-3 text-right font-medium text-gray-900">
-                  ${tx.cost.toFixed(2)}
+                  {tx.weight.toLocaleString()}
                 </td>
               </tr>
             ))}

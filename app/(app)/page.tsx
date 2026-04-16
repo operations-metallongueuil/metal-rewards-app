@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/prisma'
-import { computeRewardState } from '@/lib/rewards'
+import { computeRewardState, POINTS_PER_REWARD } from '@/lib/rewards'
 import Link from 'next/link'
 
 export const dynamic = 'force-dynamic'
@@ -10,18 +10,18 @@ export default async function DashboardPage() {
     prisma.reward.count({ where: { redeemedAt: null } }),
     prisma.customer.findMany({
       include: {
-        transactions: { select: { cost: true, effectiveDate: true } },
+        transactions: { select: { weight: true, effectiveDate: true } },
         rewards: { select: { id: true, redeemedAt: true } },
       },
     }),
   ])
 
   const customerStats = allCustomers.map((c) => {
-    const { currentBalance } = computeRewardState(
-      c.transactions.map((t) => ({ cost: t.cost, effectiveDate: t.effectiveDate }))
+    const { currentPoints } = computeRewardState(
+      c.transactions.map((t) => ({ weight: t.weight, effectiveDate: t.effectiveDate }))
     )
     const pendingCount = c.rewards.filter((r) => !r.redeemedAt).length
-    return { id: c.id, name: c.name, currentBalance, pendingCount }
+    return { id: c.id, name: c.name, currentPoints, pendingCount }
   })
 
   const withPendingRewards = customerStats
@@ -29,13 +29,14 @@ export default async function DashboardPage() {
     .sort((a, b) => b.pendingCount - a.pendingCount)
 
   const nearThreshold = customerStats
-    .filter((c) => c.currentBalance >= 250 && c.pendingCount === 0)
-    .sort((a, b) => b.currentBalance - a.currentBalance)
+    .filter((c) => c.currentPoints >= POINTS_PER_REWARD - 3 && c.pendingCount === 0)
+    .sort((a, b) => b.currentPoints - a.currentPoints)
     .slice(0, 10)
 
   return (
     <div className="p-6">
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">Dashboard</h1>
+      <h1 className="text-2xl font-bold text-gray-900 mb-1">Dashboard</h1>
+      <p className="text-sm text-gray-400 mb-6">500 lbs = 1 point &middot; 10 points = $20 gas gift card</p>
 
       {/* Stats */}
       <div className="grid grid-cols-3 gap-4 mb-8">
@@ -54,7 +55,7 @@ export default async function DashboardPage() {
           </p>
         </div>
         <div className="bg-white rounded-xl border shadow-sm p-5">
-          <p className="text-sm text-gray-500">Near Threshold ($250+)</p>
+          <p className="text-sm text-gray-500">Near 10 pts (7+)</p>
           <p className="text-3xl font-bold text-blue-600 mt-1">{nearThreshold.length}</p>
         </div>
       </div>
@@ -110,7 +111,7 @@ export default async function DashboardPage() {
                     {c.name}
                   </Link>
                   <span className="text-sm font-medium text-blue-600">
-                    ${c.currentBalance.toFixed(2)} / $300
+                    {c.currentPoints} / 10 pts
                   </span>
                 </li>
               ))}

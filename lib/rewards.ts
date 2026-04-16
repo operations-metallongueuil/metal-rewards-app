@@ -1,60 +1,66 @@
 import { prisma } from './prisma'
 
-export const REWARD_THRESHOLD = 300
+export const LBS_PER_POINT = 500
+export const POINTS_PER_REWARD = 10
+export const REWARD_VALUE_DOLLARS = 20
 
 export interface RewardState {
   rewardsEarned: number
-  currentBalance: number
+  currentPoints: number  // 0–9 complete points toward next gift card
+  totalLbs: number
   rewardDates: Date[]
 }
 
 /**
- * Walks through transactions chronologically and computes how many rewards
- * the customer has earned and what their current running balance is.
+ * Walks transactions chronologically and computes how many gift cards the
+ * customer has earned and how many points they currently have.
  *
- * Every time the running total hits $300, a reward is earned and the counter
- * resets. A single large transaction can trigger multiple rewards.
+ * 500 lbs = 1 point. 10 points = 1 $20 gas gift card (5,000 lbs total).
+ * Points reset after each gift card is earned.
  */
 export function computeRewardState(
-  transactions: { cost: number; effectiveDate: Date }[]
+  transactions: { weight: number; effectiveDate: Date }[]
 ): RewardState {
   const sorted = [...transactions].sort(
     (a, b) => a.effectiveDate.getTime() - b.effectiveDate.getTime()
   )
 
-  let runningTotal = 0
+  let totalLbs = 0
   let rewardsEarned = 0
   const rewardDates: Date[] = []
 
   for (const tx of sorted) {
-    runningTotal += tx.cost
-    while (runningTotal >= REWARD_THRESHOLD) {
-      runningTotal -= REWARD_THRESHOLD
+    totalLbs += tx.weight
+    const totalRewardsNow = Math.floor(totalLbs / (LBS_PER_POINT * POINTS_PER_REWARD))
+    while (rewardsEarned < totalRewardsNow) {
       rewardsEarned++
       rewardDates.push(tx.effectiveDate)
     }
   }
 
+  const totalPoints = Math.floor(totalLbs / LBS_PER_POINT)
+  const currentPoints = totalPoints % POINTS_PER_REWARD
+
   return {
     rewardsEarned,
-    currentBalance: parseFloat(runningTotal.toFixed(2)),
+    currentPoints,
+    totalLbs,
     rewardDates,
   }
 }
 
 /**
  * After importing transactions for a customer, call this to create any
- * newly-earned reward records in the database.
- * Returns the number of new rewards created.
+ * newly-earned reward records. Returns the number of new rewards created.
  */
 export async function syncRewardsForCustomer(customerId: string): Promise<number> {
   const transactions = await prisma.transaction.findMany({
     where: { customerId },
-    select: { cost: true, effectiveDate: true },
+    select: { weight: true, effectiveDate: true },
   })
 
   const { rewardsEarned, rewardDates } = computeRewardState(
-    transactions.map((t) => ({ cost: t.cost, effectiveDate: t.effectiveDate }))
+    transactions.map((t) => ({ weight: t.weight, effectiveDate: t.effectiveDate }))
   )
 
   const existingCount = await prisma.reward.count({ where: { customerId } })

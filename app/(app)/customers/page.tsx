@@ -13,19 +13,17 @@ export default async function CustomersPage({
   const search = searchParams.search?.trim() || ''
 
   const customers = await prisma.customer.findMany({
-    where: search
-      ? { name: { contains: search.toUpperCase() } }
-      : undefined,
+    where: search ? { name: { contains: search.toUpperCase() } } : undefined,
     include: {
-      transactions: { select: { cost: true, effectiveDate: true } },
+      transactions: { select: { weight: true, effectiveDate: true } },
       rewards: { select: { id: true, redeemedAt: true } },
     },
     orderBy: { name: 'asc' },
   })
 
   const customerStats = customers.map((c) => {
-    const { currentBalance } = computeRewardState(
-      c.transactions.map((t) => ({ cost: t.cost, effectiveDate: t.effectiveDate }))
+    const { currentPoints, totalLbs } = computeRewardState(
+      c.transactions.map((t) => ({ weight: t.weight, effectiveDate: t.effectiveDate }))
     )
     const pendingCount = c.rewards.filter((r) => !r.redeemedAt).length
     const redeemedCount = c.rewards.filter((r) => r.redeemedAt).length
@@ -35,7 +33,8 @@ export default async function CustomersPage({
     return {
       id: c.id,
       name: c.name,
-      currentBalance,
+      currentPoints,
+      totalLbs,
       pendingCount,
       redeemedCount,
       lastTxDate: lastTx?.effectiveDate ?? null,
@@ -63,7 +62,8 @@ export default async function CustomersPage({
           <thead className="bg-gray-50 border-b">
             <tr>
               <th className="text-left px-4 py-3 font-medium text-gray-600">Name</th>
-              <th className="text-left px-4 py-3 font-medium text-gray-600 w-48">Progress</th>
+              <th className="text-left px-4 py-3 font-medium text-gray-600 w-44">Points</th>
+              <th className="text-right px-4 py-3 font-medium text-gray-600">Total lbs</th>
               <th className="text-right px-4 py-3 font-medium text-gray-600">Pending</th>
               <th className="text-right px-4 py-3 font-medium text-gray-600">Redeemed</th>
               <th className="text-right px-4 py-3 font-medium text-gray-600">Last Visit</th>
@@ -86,7 +86,10 @@ export default async function CustomersPage({
                   )}
                 </td>
                 <td className="px-4 py-3">
-                  <ProgressBar current={c.currentBalance} />
+                  <ProgressBar currentPoints={c.currentPoints} />
+                </td>
+                <td className="px-4 py-3 text-right text-gray-600">
+                  {c.totalLbs.toLocaleString()} lbs
                 </td>
                 <td className="px-4 py-3 text-right text-gray-700">{c.pendingCount}</td>
                 <td className="px-4 py-3 text-right text-gray-500">{c.redeemedCount}</td>
@@ -97,7 +100,7 @@ export default async function CustomersPage({
             ))}
             {customerStats.length === 0 && (
               <tr>
-                <td colSpan={5} className="px-4 py-10 text-center text-gray-400">
+                <td colSpan={6} className="px-4 py-10 text-center text-gray-400">
                   No customers found
                 </td>
               </tr>

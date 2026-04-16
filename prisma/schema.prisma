@@ -21,12 +21,12 @@ model Transaction {
   customer      Customer @relation(fields: [customerId], references: [id])
   effectiveDate DateTime
   commodityType String
-  cost          Float
+  weight        Float
   status        String   @default("PAID")
   importedAt    DateTime @default(now())
 
   // Prevents the same transaction from being imported twice
-  @@unique([customerId, effectiveDate, cost])
+  @@unique([customerId, effectiveDate, weight])
   @@index([customerId])
 }
 
