@@ -35,53 +35,49 @@ export default async function DashboardPage() {
 
   return (
     <div className="p-6">
-      <h1 className="text-2xl font-bold text-gray-900 mb-1">Dashboard</h1>
-      <p className="text-sm text-gray-400 mb-6">500 lbs = 1 point &middot; 10 points = $20 gas gift card</p>
+      {/* Page header */}
+      <div className="mb-7">
+        <h1 className="text-2xl font-bold text-white tracking-tight">Dashboard</h1>
+        <p className="text-gray-500 text-sm mt-1">500 lbs = 1 point &middot; 10 points = $20 gas gift card</p>
+      </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-3 gap-4 mb-8">
-        <div className="bg-white rounded-xl border shadow-sm p-5">
-          <p className="text-sm text-gray-500">Total Customers</p>
-          <p className="text-3xl font-bold text-gray-900 mt-1">{totalCustomers}</p>
+      <div className="grid grid-cols-3 gap-4 mb-7">
+        <div className="bg-[#1a1a1a] border border-white/10 rounded-[20px] p-5">
+          <p className="text-xs text-gray-500 uppercase tracking-wider font-medium mb-2">Total Customers</p>
+          <p className="text-3xl font-bold text-white">{totalCustomers}</p>
         </div>
-        <div className="bg-white rounded-xl border shadow-sm p-5">
-          <p className="text-sm text-gray-500">Rewards to Issue</p>
-          <p
-            className={`text-3xl font-bold mt-1 ${
-              pendingRewards > 0 ? 'text-amber-500' : 'text-gray-900'
-            }`}
-          >
+        <div className="bg-[#1a1a1a] border border-white/10 rounded-[20px] p-5">
+          <p className="text-xs text-gray-500 uppercase tracking-wider font-medium mb-2">Rewards to Issue</p>
+          <p className={`text-3xl font-bold ${pendingRewards > 0 ? 'text-orange-500' : 'text-white'}`}>
             {pendingRewards}
           </p>
         </div>
-        <div className="bg-white rounded-xl border shadow-sm p-5">
-          <p className="text-sm text-gray-500">Near 10 pts (7+)</p>
-          <p className="text-3xl font-bold text-blue-600 mt-1">{nearThreshold.length}</p>
+        <div className="bg-[#1a1a1a] border border-white/10 rounded-[20px] p-5">
+          <p className="text-xs text-gray-500 uppercase tracking-wider font-medium mb-2">Near 10 pts (7+)</p>
+          <p className="text-3xl font-bold text-orange-500/70">{nearThreshold.length}</p>
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-6">
+      <div className="grid grid-cols-2 gap-5">
         {/* Pending Rewards */}
-        <div className="bg-white rounded-xl border shadow-sm">
-          <div className="flex items-center justify-between px-4 py-3 border-b">
-            <h2 className="font-semibold text-gray-800">Rewards to Issue</h2>
-            <Link href="/rewards" className="text-sm text-emerald-600 hover:underline">
+        <div className="bg-[#1a1a1a] border border-white/10 rounded-[20px] overflow-hidden">
+          <div className="flex items-center justify-between px-5 py-4 border-b border-white/10">
+            <h2 className="font-semibold text-white text-sm uppercase tracking-wider">Rewards to Issue</h2>
+            <Link href="/rewards" className="text-xs text-orange-500 hover:text-orange-400 font-medium uppercase tracking-wider transition-colors">
               View all
             </Link>
           </div>
           {withPendingRewards.length === 0 ? (
-            <p className="p-4 text-sm text-gray-400">No pending rewards</p>
+            <p className="px-5 py-6 text-sm text-gray-600">No pending rewards</p>
           ) : (
-            <ul className="divide-y">
+            <ul className="divide-y divide-white/5">
               {withPendingRewards.map((c) => (
-                <li key={c.id} className="flex items-center justify-between px-4 py-3">
-                  <Link
-                    href={`/customers/${c.id}`}
-                    className="font-medium text-gray-800 hover:text-emerald-600 text-sm"
-                  >
+                <li key={c.id} className="flex items-center justify-between px-5 py-3 hover:bg-white/5 transition-colors">
+                  <Link href={`/customers/${c.id}`} className="text-sm font-medium text-gray-200 hover:text-orange-500 transition-colors">
                     {c.name}
                   </Link>
-                  <span className="bg-amber-100 text-amber-700 text-xs font-semibold px-2 py-1 rounded-full">
+                  <span className="bg-orange-500/15 text-orange-500 border border-orange-500/20 text-xs font-semibold px-2.5 py-1 rounded-full">
                     {c.pendingCount} card{c.pendingCount > 1 ? 's' : ''} owed
                   </span>
                 </li>
@@ -91,26 +87,23 @@ export default async function DashboardPage() {
         </div>
 
         {/* Near Threshold */}
-        <div className="bg-white rounded-xl border shadow-sm">
-          <div className="flex items-center justify-between px-4 py-3 border-b">
-            <h2 className="font-semibold text-gray-800">Near Threshold</h2>
-            <Link href="/customers" className="text-sm text-emerald-600 hover:underline">
+        <div className="bg-[#1a1a1a] border border-white/10 rounded-[20px] overflow-hidden">
+          <div className="flex items-center justify-between px-5 py-4 border-b border-white/10">
+            <h2 className="font-semibold text-white text-sm uppercase tracking-wider">Near Threshold</h2>
+            <Link href="/customers" className="text-xs text-orange-500 hover:text-orange-400 font-medium uppercase tracking-wider transition-colors">
               View all
             </Link>
           </div>
           {nearThreshold.length === 0 ? (
-            <p className="p-4 text-sm text-gray-400">No customers near threshold</p>
+            <p className="px-5 py-6 text-sm text-gray-600">No customers near threshold</p>
           ) : (
-            <ul className="divide-y">
+            <ul className="divide-y divide-white/5">
               {nearThreshold.map((c) => (
-                <li key={c.id} className="flex items-center justify-between px-4 py-3">
-                  <Link
-                    href={`/customers/${c.id}`}
-                    className="font-medium text-gray-800 hover:text-emerald-600 text-sm"
-                  >
+                <li key={c.id} className="flex items-center justify-between px-5 py-3 hover:bg-white/5 transition-colors">
+                  <Link href={`/customers/${c.id}`} className="text-sm font-medium text-gray-200 hover:text-orange-500 transition-colors">
                     {c.name}
                   </Link>
-                  <span className="text-sm font-medium text-blue-600">
+                  <span className="text-sm font-semibold text-orange-500/80">
                     {c.currentPoints} / 10 pts
                   </span>
                 </li>

@@ -19,7 +19,7 @@ export default function RedeemButton({ rewardId }: { rewardId: string }) {
     <button
       onClick={handleRedeem}
       disabled={loading}
-      className="bg-emerald-600 text-white text-xs px-3 py-1.5 rounded-lg hover:bg-emerald-700 disabled:opacity-50 transition-colors font-medium"
+      className="text-xs font-semibold px-4 py-1.5 rounded-full border-2 border-orange-500 text-white bg-black hover:bg-orange-500 disabled:opacity-40 transition-all duration-200 uppercase tracking-wide"
     >
       {loading ? 'Saving...' : 'Mark Redeemed'}
     </button>

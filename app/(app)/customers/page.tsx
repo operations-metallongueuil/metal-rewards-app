@@ -43,64 +43,65 @@ export default async function CustomersPage({
 
   return (
     <div className="p-6">
-      <div className="flex items-center justify-between mb-5">
-        <h1 className="text-2xl font-bold text-gray-900">Customers</h1>
-        <span className="text-sm text-gray-400">{customers.length} customers</span>
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h1 className="text-2xl font-bold text-white tracking-tight">Customers</h1>
+          <p className="text-gray-500 text-sm mt-1">{customers.length} customers</p>
+        </div>
       </div>
 
-      <form className="mb-4">
+      {/* Search */}
+      <form className="mb-5">
         <input
           name="search"
           defaultValue={search}
           placeholder="Search by name..."
-          className="w-full max-w-sm px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+          className="w-full max-w-sm px-4 py-2.5 bg-[#1a1a1a] border border-white/10 rounded-xl text-white placeholder-gray-600 text-sm focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-colors"
         />
       </form>
 
-      <div className="bg-white rounded-xl border shadow-sm overflow-hidden">
+      {/* Table */}
+      <div className="bg-[#1a1a1a] border border-white/10 rounded-[20px] overflow-hidden">
         <table className="w-full text-sm">
-          <thead className="bg-gray-50 border-b">
-            <tr>
-              <th className="text-left px-4 py-3 font-medium text-gray-600">Name</th>
-              <th className="text-left px-4 py-3 font-medium text-gray-600 w-44">Points</th>
-              <th className="text-right px-4 py-3 font-medium text-gray-600">Total lbs</th>
-              <th className="text-right px-4 py-3 font-medium text-gray-600">Pending</th>
-              <th className="text-right px-4 py-3 font-medium text-gray-600">Redeemed</th>
-              <th className="text-right px-4 py-3 font-medium text-gray-600">Last Visit</th>
+          <thead>
+            <tr className="border-b border-white/10">
+              <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Name</th>
+              <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider w-44">Points</th>
+              <th className="text-right px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Total lbs</th>
+              <th className="text-right px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Pending</th>
+              <th className="text-right px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Redeemed</th>
+              <th className="text-right px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Last Visit</th>
             </tr>
           </thead>
-          <tbody className="divide-y">
+          <tbody className="divide-y divide-white/5">
             {customerStats.map((c) => (
-              <tr key={c.id} className="hover:bg-gray-50">
-                <td className="px-4 py-3">
-                  <Link
-                    href={`/customers/${c.id}`}
-                    className="font-medium text-gray-900 hover:text-emerald-600"
-                  >
+              <tr key={c.id} className="hover:bg-white/5 transition-colors">
+                <td className="px-5 py-3.5">
+                  <Link href={`/customers/${c.id}`} className="font-medium text-gray-100 hover:text-orange-500 transition-colors">
                     {c.name}
                   </Link>
                   {c.pendingCount > 0 && (
-                    <span className="ml-2 bg-amber-100 text-amber-700 text-xs px-1.5 py-0.5 rounded">
+                    <span className="ml-2 bg-orange-500/15 text-orange-500 border border-orange-500/20 text-xs px-1.5 py-0.5 rounded-full font-semibold">
                       {c.pendingCount} owed
                     </span>
                   )}
                 </td>
-                <td className="px-4 py-3">
+                <td className="px-5 py-3.5">
                   <ProgressBar currentPoints={c.currentPoints} />
                 </td>
-                <td className="px-4 py-3 text-right text-gray-600">
+                <td className="px-5 py-3.5 text-right text-gray-400">
                   {c.totalLbs.toLocaleString()} lbs
                 </td>
-                <td className="px-4 py-3 text-right text-gray-700">{c.pendingCount}</td>
-                <td className="px-4 py-3 text-right text-gray-500">{c.redeemedCount}</td>
-                <td className="px-4 py-3 text-right text-gray-500">
+                <td className="px-5 py-3.5 text-right text-gray-300">{c.pendingCount}</td>
+                <td className="px-5 py-3.5 text-right text-gray-500">{c.redeemedCount}</td>
+                <td className="px-5 py-3.5 text-right text-gray-500">
                   {c.lastTxDate ? new Date(c.lastTxDate).toLocaleDateString() : '—'}
                 </td>
               </tr>
             ))}
             {customerStats.length === 0 && (
               <tr>
-                <td colSpan={6} className="px-4 py-10 text-center text-gray-400">
+                <td colSpan={6} className="px-5 py-12 text-center text-gray-600">
                   No customers found
                 </td>
               </tr>

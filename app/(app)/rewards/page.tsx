@@ -9,7 +9,7 @@ export default async function RewardsPage() {
     prisma.reward.findMany({
       where: { redeemedAt: null },
       include: { customer: true },
-      orderBy: { earnedAt: 'asc' }, // oldest first — longest waiting
+      orderBy: { earnedAt: 'asc' },
     }),
     prisma.reward.findMany({
       where: { NOT: { redeemedAt: null } },
@@ -21,44 +21,44 @@ export default async function RewardsPage() {
 
   return (
     <div className="p-6">
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">Rewards</h1>
+      <div className="mb-7">
+        <h1 className="text-2xl font-bold text-white tracking-tight">Rewards</h1>
+        <p className="text-gray-500 text-sm mt-1">$20 gas gift card per 10 points earned</p>
+      </div>
 
       {/* Pending */}
-      <div className="bg-white rounded-xl border shadow-sm mb-6">
-        <div className="flex items-center justify-between px-4 py-3 border-b">
-          <h2 className="font-semibold text-gray-800">Pending — Gas Gift Cards to Issue</h2>
+      <div className="bg-[#1a1a1a] border border-white/10 rounded-[20px] overflow-hidden mb-5">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-white/10">
+          <h2 className="font-semibold text-white text-sm uppercase tracking-wider">Pending — Gift Cards to Issue</h2>
           {pending.length > 0 && (
-            <span className="bg-amber-100 text-amber-700 text-xs font-semibold px-2.5 py-1 rounded-full">
+            <span className="bg-orange-500/15 text-orange-500 border border-orange-500/20 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wide">
               {pending.length} to issue
             </span>
           )}
         </div>
         {pending.length === 0 ? (
-          <p className="p-4 text-sm text-gray-400">No pending rewards</p>
+          <p className="px-5 py-8 text-sm text-gray-600">No pending rewards</p>
         ) : (
           <table className="w-full text-sm">
-            <thead className="bg-gray-50 border-b">
-              <tr>
-                <th className="text-left px-4 py-3 font-medium text-gray-600">Customer</th>
-                <th className="text-left px-4 py-3 font-medium text-gray-600">Earned On</th>
-                <th className="text-right px-4 py-3 font-medium text-gray-600">Action</th>
+            <thead>
+              <tr className="border-b border-white/5">
+                <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Customer</th>
+                <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Earned On</th>
+                <th className="text-right px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Action</th>
               </tr>
             </thead>
-            <tbody className="divide-y">
+            <tbody className="divide-y divide-white/5">
               {pending.map((r) => (
-                <tr key={r.id}>
-                  <td className="px-4 py-3">
-                    <Link
-                      href={`/customers/${r.customerId}`}
-                      className="font-medium text-gray-900 hover:text-emerald-600"
-                    >
+                <tr key={r.id} className="hover:bg-white/5 transition-colors">
+                  <td className="px-5 py-3.5">
+                    <Link href={`/customers/${r.customerId}`} className="font-medium text-gray-100 hover:text-orange-500 transition-colors">
                       {r.customer.name}
                     </Link>
                   </td>
-                  <td className="px-4 py-3 text-gray-600">
+                  <td className="px-5 py-3.5 text-gray-400">
                     {new Date(r.earnedAt).toLocaleDateString()}
                   </td>
-                  <td className="px-4 py-3 text-right">
+                  <td className="px-5 py-3.5 text-right">
                     <RedeemButton rewardId={r.id} />
                   </td>
                 </tr>
@@ -69,38 +69,31 @@ export default async function RewardsPage() {
       </div>
 
       {/* Redeemed */}
-      <div className="bg-white rounded-xl border shadow-sm">
-        <div className="px-4 py-3 border-b">
-          <h2 className="font-semibold text-gray-800">Recently Redeemed</h2>
+      <div className="bg-[#1a1a1a] border border-white/10 rounded-[20px] overflow-hidden">
+        <div className="px-5 py-4 border-b border-white/10">
+          <h2 className="font-semibold text-white text-sm uppercase tracking-wider">Recently Redeemed</h2>
         </div>
         {redeemed.length === 0 ? (
-          <p className="p-4 text-sm text-gray-400">No redeemed rewards yet</p>
+          <p className="px-5 py-8 text-sm text-gray-600">No redeemed rewards yet</p>
         ) : (
           <table className="w-full text-sm">
-            <thead className="bg-gray-50 border-b">
-              <tr>
-                <th className="text-left px-4 py-3 font-medium text-gray-600">Customer</th>
-                <th className="text-left px-4 py-3 font-medium text-gray-600">Earned</th>
-                <th className="text-left px-4 py-3 font-medium text-gray-600">Redeemed</th>
+            <thead>
+              <tr className="border-b border-white/5">
+                <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Customer</th>
+                <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Earned</th>
+                <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Redeemed</th>
               </tr>
             </thead>
-            <tbody className="divide-y">
+            <tbody className="divide-y divide-white/5">
               {redeemed.map((r) => (
-                <tr key={r.id}>
-                  <td className="px-4 py-3">
-                    <Link
-                      href={`/customers/${r.customerId}`}
-                      className="font-medium text-gray-900 hover:text-emerald-600"
-                    >
+                <tr key={r.id} className="hover:bg-white/5 transition-colors">
+                  <td className="px-5 py-3.5">
+                    <Link href={`/customers/${r.customerId}`} className="font-medium text-gray-100 hover:text-orange-500 transition-colors">
                       {r.customer.name}
                     </Link>
                   </td>
-                  <td className="px-4 py-3 text-gray-600">
-                    {new Date(r.earnedAt).toLocaleDateString()}
-                  </td>
-                  <td className="px-4 py-3 text-gray-600">
-                    {new Date(r.redeemedAt!).toLocaleDateString()}
-                  </td>
+                  <td className="px-5 py-3.5 text-gray-400">{new Date(r.earnedAt).toLocaleDateString()}</td>
+                  <td className="px-5 py-3.5 text-gray-400">{new Date(r.redeemedAt!).toLocaleDateString()}</td>
                 </tr>
               ))}
             </tbody>
