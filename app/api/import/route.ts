@@ -11,7 +11,14 @@ function parseGreensparkDate(dateStr: unknown): Date {
     return new Date(Math.round((dateStr - 25569) * 86400 * 1000))
   }
   const s = String(dateStr).trim()
-  // Greenspark format: "04/16/2026 (08:11:47)"
+
+  // CSV export format: "2026-04-16T08:44:18.216-04:00[America/Toronto]"
+  // Strip the IANA timezone identifier in brackets before parsing
+  const stripped = s.replace(/\[.*\]$/, '').trim()
+  const iso = new Date(stripped)
+  if (!isNaN(iso.getTime())) return iso
+
+  // UI/manual format: "04/16/2026 (08:11:47)"
   const match = s.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})\s*\((\d{2}):(\d{2}):(\d{2})\)/)
   if (match) {
     const [, month, day, year, hours, minutes, seconds] = match
@@ -24,9 +31,7 @@ function parseGreensparkDate(dateStr: unknown): Date {
       parseInt(seconds)
     )
   }
-  // Generic fallback
-  const d = new Date(s)
-  if (!isNaN(d.getTime())) return d
+
   throw new Error(`Cannot parse date: ${dateStr}`)
 }
 
