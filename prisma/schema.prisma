@@ -1,0 +1,42 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Customer {
+  id           String        @id @default(cuid())
+  name         String        @unique
+  createdAt    DateTime      @default(now())
+  transactions Transaction[]
+  rewards      Reward[]
+}
+
+model Transaction {
+  id            String   @id @default(cuid())
+  customerId    String
+  customer      Customer @relation(fields: [customerId], references: [id])
+  effectiveDate DateTime
+  commodityType String
+  cost          Float
+  status        String   @default("PAID")
+  importedAt    DateTime @default(now())
+
+  // Prevents the same transaction from being imported twice
+  @@unique([customerId, effectiveDate, cost])
+  @@index([customerId])
+}
+
+model Reward {
+  id         String    @id @default(cuid())
+  customerId String
+  customer   Customer  @relation(fields: [customerId], references: [id])
+  earnedAt   DateTime
+  redeemedAt DateTime?
+  createdAt  DateTime  @default(now())
+
+  @@index([customerId])
+}
